@@ -1,0 +1,29 @@
+name: Hourly Stock Fetcher
+on:
+  schedule:
+    - cron: '0 * * * *' # every hour
+  workflow_dispatch: #manual trigger
+
+jobs:
+    fetch-stock:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+
+        - name: Set up JDK 21
+          uses: actions/setup-java@v3
+          with:
+            java-version: '21'
+            distribution: 'temurin'
+
+        - name: Build project with Maven
+          run: ./mvnw clean package -DskipTests
+
+        - name: Run Stock Fetcher
+          run: java -jar target/*.jar
+          env:
+            SPRING_DATASOURCE_URL: ${{ secrets.DB_URL }}
+            SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USER }}
+            SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
